@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin BE Demo</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    button { margin: 4px; }
+    pre { background: #f4f4f4; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Admin BE Demo</h1>
+
+  <h2>Register</h2>
+  <input id="regUser" placeholder="username" />
+  <input id="regPass" type="password" placeholder="password" />
+  <button onclick="register()">Register</button>
+
+  <h2>Login (Basic Auth)</h2>
+  <input id="authUser" placeholder="username" />
+  <input id="authPass" type="password" placeholder="password" />
+  <button onclick="setAuth()">Set Auth</button>
+
+  <h2>APIs</h2>
+  <button onclick="callApi('/api/admin/roles')">Roles</button>
+  <button onclick="callApi('/api/admin/permissions')">Permissions</button>
+
+  <h3>Response</h3>
+  <pre id="out"></pre>
+
+  <script>
+    const BASE = 'http://localhost:8080';
+    let authHeader = null;
+    function register() {
+      fetch(BASE + '/api/public/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: regUser.value, password: regPass.value })
+      }).then(r => r.json()).then(d => out.textContent = JSON.stringify(d, null, 2));
+    }
+    function setAuth() {
+      authHeader = 'Basic ' + btoa(authUser.value + ':' + authPass.value);
+      out.textContent = 'Auth set';
+    }
+    function callApi(path) {
+      fetch(BASE + path, { headers: authHeader ? { Authorization: authHeader } : {} })
+        .then(r => r.json()).then(d => out.textContent = JSON.stringify(d, null, 2))
+        .catch(e => out.textContent = e);
+    }
+  </script>
+</body>
+</html>
